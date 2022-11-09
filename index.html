@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/filter.css">
+		<link rel="stylesheet" href="css/L.Control.MousePosition.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+		img{
+			max-width: 100%;
+			max-height: 100%;
+			}
+        </style>
+        <title>Forest Reserves and National Parks in Tanzania</title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/tailDT.js"></script>
+		<script src="js/L.Control.MousePosition.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/TanzaniaNationalParks2016_1.js"></script>
+        <script src="data/TanzaniaForestReserves2020_2.js"></script>
+        <script>
+        var highlightLayer;
+		
+		function highlightFeature(e) {
+		highlightLayer = e.target;
+		highlightLayer.setStyle({
+		color: '#cb6649',
+		weight: 4,
+			});
+		}
+		
+		function zoomToFeature(e) {map.fitBounds(e.target.getBounds({padding: [200, 200]})); }
+
+		
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:5
+		})
+		
+		L.control.mousePosition({
+			numDigits: 2,
+			})
+		.addTo(map);
+		
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>&middot;<a href=" https://github.com/ardhi/Leaflet.MousePosition" target="_blank"> Leaflet.MousePosition </a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+        }
+       map.createPane('pane_OpenStreetMap_0');
+map.getPane('pane_OpenStreetMap_0').style.zIndex = 400;
+var layer_OpenStreetMap_0 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+ pane: 'pane_OpenStreetMap_0',
+ opacity: 1.0,
+ attribution: '<a href="https://www.openstreetmap.org/">© OpenStreetMap contributors</a>',
+ minZoom: 5,
+ maxZoom: 28,
+ minNativeZoom: 0,
+ maxNativeZoom: 18
+})
+layer_Google_sat = L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+minZoom: 5,
+maxZoom: 28,
+attribution: '<a href="https://www.google.com/maps">© Google</a>'
+});
+map.addLayer(layer_OpenStreetMap_0, layer_Google_sat);
+       
+
+
+	   function pop_TanzaniaNationalParks2016_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+				click: zoomToFeature,
+
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Name</th>\
+                        <td>' + (feature.properties['NAME'] !== null ? autolinker.link(feature.properties['NAME'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Designation</th>\
+                        <td>' + (feature.properties['DESIG'] !== null ? autolinker.link(feature.properties['DESIG'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Area (km^2)</th>\
+                        <td>' + (feature.properties['GIS_AREA'] !== null ? autolinker.link(feature.properties['GIS_AREA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Status year</th>\
+                        <td>' + (feature.properties['STATUS_YR'] !== null ? autolinker.link(feature.properties['STATUS_YR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+		
+		
+
+		
+        function style_TanzaniaNationalParks2016_1_0(feature) {
+            switch(String(feature.properties['DESIG_ENG'])) {
+                case 'Conservation Area':
+                    return {
+                pane: 'pane_TanzaniaNationalParks2016_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,175,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Game Reserve':
+                    return {
+                pane: 'pane_TanzaniaNationalParks2016_1',
+                opacity: 1,
+                color: 'rgba(1,1,1,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,240,87,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'National Park':
+                    return {
+                pane: 'pane_TanzaniaNationalParks2016_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(77,175,74,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Open area':
+                    return {
+                pane: 'pane_TanzaniaNationalParks2016_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(245,224,33,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Wildlife Management Area':
+                    return {
+                pane: 'pane_TanzaniaNationalParks2016_1',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(19,112,33,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_TanzaniaNationalParks2016_1');
+        map.getPane('pane_TanzaniaNationalParks2016_1').style.zIndex = 401;
+        map.getPane('pane_TanzaniaNationalParks2016_1').style['mix-blend-mode'] = 'normal';
+        var layer_TanzaniaNationalParks2016_1 = new L.geoJson(json_TanzaniaNationalParks2016_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_TanzaniaNationalParks2016_1',
+            layerName: 'layer_TanzaniaNationalParks2016_1',
+            pane: 'pane_TanzaniaNationalParks2016_1',
+            onEachFeature: pop_TanzaniaNationalParks2016_1,
+            style: style_TanzaniaNationalParks2016_1_0,
+        });
+        bounds_group.addLayer(layer_TanzaniaNationalParks2016_1);
+        map.addLayer(layer_TanzaniaNationalParks2016_1);
+       
+
+	   function pop_TanzaniaForestReserves2020_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+				click: zoomToFeature,
+
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Name</th>\
+                        <td>' + (feature.properties['NAME'] !== null ? autolinker.link(feature.properties['NAME'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Designation</th>\
+                        <td>' + (feature.properties['DESIG'] !== null ? autolinker.link(feature.properties['DESIG'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Area (km^2)</th>\
+                        <td>' + (feature.properties['GIS_AREA'] !== null ? autolinker.link(feature.properties['GIS_AREA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Status year</th>\
+                        <td>' + (feature.properties['STATUS_YR'] !== null ? autolinker.link(feature.properties['STATUS_YR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+		var pattern_FP = new L.StripePattern({
+ weight: 1.5,
+ spaceWeight: 1,
+ color: '#bee055',
+ opacity: 1.0,
+ spaceOpacity: 0,
+ angle: 270
+});
+pattern_FP.addTo(map);
+var pattern_FR = new L.StripePattern({
+ weight: 1.5,
+ spaceWeight: 1,
+ color: '#047e00',
+ opacity: 1.0,
+ spaceOpacity: 0,
+ angle: 270
+});
+pattern_FR.addTo(map);
+var pattern_NFR = new L.StripePattern({
+ weight: 1.5,
+ spaceWeight: 1,
+ color: '#7fe17c',
+ opacity: 1.0,
+ spaceOpacity: 0,
+ angle: 270
+});
+pattern_NFR.addTo(map);
+	
+
+
+
+        function style_TanzaniaForestReserves2020_2_0(feature) {
+            switch(String(feature.properties['q2wHide_DESIG_ENG'])) {
+                case 'Forest Plantation':
+                    return {
+                pane: 'pane_TanzaniaForestReserves2020_2',
+                opacity: 1,
+                color: 'rgba(190,224,85,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fill: true,
+                fillOpacity: 1,
+				fillPattern: pattern_FP,
+                fillColor: 'rgba(190,224,85,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Forest Reserve':
+                    return {
+                pane: 'pane_TanzaniaForestReserves2020_2',
+                opacity: 1,
+                color: 'rgba(4,126,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fill: true,
+                fillOpacity: 1,
+				fillPattern: pattern_FP,
+                fillColor: 'rgba(4,126,0,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Nature Forest Reserve':
+                    return {
+                pane: 'pane_TanzaniaForestReserves2020_2',
+                opacity: 1,
+                color: 'rgba(127,225,124,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0, 
+                fill: true,
+                fillOpacity: 1,
+				fillPattern: pattern_FP,
+                fillColor: 'rgba(127,225,124,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_TanzaniaForestReserves2020_2');
+        map.getPane('pane_TanzaniaForestReserves2020_2').style.zIndex = 402;
+        map.getPane('pane_TanzaniaForestReserves2020_2').style['mix-blend-mode'] = 'normal';
+        var layer_TanzaniaForestReserves2020_2 = new L.geoJson(json_TanzaniaForestReserves2020_2, {
+            attribution: '<a href="https://www.protectedplanet.net/country/TZA">UNEP-WCMC</a>',
+            interactive: true,
+            dataVar: 'json_TanzaniaForestReserves2020_2',
+            layerName: 'layer_TanzaniaForestReserves2020_2',
+            pane: 'pane_TanzaniaForestReserves2020_2',
+            onEachFeature: pop_TanzaniaForestReserves2020_2,
+            style: style_TanzaniaForestReserves2020_2_0,
+        });
+        bounds_group.addLayer(layer_TanzaniaForestReserves2020_2);
+        map.addLayer(layer_TanzaniaForestReserves2020_2);
+            var title = new L.Control({'position':'bottomleft'});
+            title.onAdd = function (map) {
+                this._div = L.DomUtil.create('div', 'info');
+                this.update();
+                return this._div;
+            };
+            title.update = function () {
+                this._div.innerHTML = '<h2>Forest Reserves and National Parks in Tanzania</h2> <p> Data produced in years 2016 and 2020 </p>';
+            };
+            title.addTo(map);
+            var abstract = new L.Control({'position':'bottomleft'});
+            abstract.onAdd = function (map) {
+                this._div = L.DomUtil.create('div',
+                'leaflet-control abstract');
+                this._div.id = 'abstract'
+                    this._div.setAttribute("onmouseenter", "abstract.show()");
+                    this._div.setAttribute("onmouseleave", "abstract.hide()");
+                    this.hide();
+                    return this._div;
+                };
+                abstract.hide = function () {
+                    this._div.classList.remove("abstractUncollapsed");
+                    this._div.classList.add("abstract");
+                    this._div.innerHTML = 'i'
+                }
+                abstract.show = function () {
+                    this._div.classList.remove("abstract");
+                    this._div.classList.add("abstractUncollapsed");
+                    this._div.innerHTML = '<a href="https://en.wikipedia.org/wiki/List_of_protected_areas_of_Tanzania"><imgsrc="images/forest.jpg"></a><br><br> The map shows the Tanzania Forest Reserves and the National parks. The data layers have last been updated in 2020 and 2016. The data layers on the forest reserves and national parks are from the national agency of Tanzania National Parks (TANAPA).<br /><br />Data Citation: UNEP-WCMC (2021). Protected Area Profile for United Republic of Tanzania from the World Database of Protected Areas, August 2021. Available at: www.protectedplanet.net';
+            };
+            abstract.addTo(map);
+        var baseMaps = {"OpenStreetMap": layer_OpenStreetMap_0,
+"Google Satellite": layer_Google_sat };
+        L.control.layers(baseMaps,{'<b>Tanzania Forest Reserves 2020</b><br /><table><tr><td style="text-align: center;"><img src="legend/TanzaniaForestReserves2020_2_ForestPlantation0.png" /></td><td>Forest Plantation</td></tr><tr><td style="text-align: center;"><img src="legend/TanzaniaForestReserves2020_2_ForestReserve1.png" /></td><td>Forest Reserve</td></tr><tr><td style="text-align: center;"><img src="legend/TanzaniaForestReserves2020_2_NatureForestReserve2.png" /></td><td>Nature Forest Reserve</td></tr></table>': layer_TanzaniaForestReserves2020_2,'<b>Tanzania National Parks 2016</b><br /><table><tr><td style="text-align: center;"><img src="legend/TanzaniaNationalParks2016_1_ConservationArea0.png" /></td><td>Conservation Area</td></tr><tr><td style="text-align: center;"><img src="legend/TanzaniaNationalParks2016_1_GameReserve1.png" /></td><td>Game Reserve</td></tr><tr><td style="text-align: center;"><img src="legend/TanzaniaNationalParks2016_1_NationalPark2.png" /></td><td>National Park</td></tr><tr><td style="text-align: center;"><img src="legend/TanzaniaNationalParks2016_1_Openarea3.png" /></td><td>Open area</td></tr><tr><td style="text-align: center;"><img src="legend/TanzaniaNationalParks2016_1_WildlifeManagementArea4.png" /></td><td>Wildlife Management Area</td></tr></table>': layer_TanzaniaNationalParks2016_1,}).addTo(map);
+        setBounds();
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"ORIG_NAME": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_ORIG_NAME = document.createElement('div');
+            div_ORIG_NAME.id = "div_ORIG_NAME";
+            div_ORIG_NAME.className= "filterselect";
+            document.getElementById("menu").appendChild(div_ORIG_NAME);
+            sel_ORIG_NAME = document.createElement('select');
+            sel_ORIG_NAME.multiple = true;
+            sel_ORIG_NAME.size = 10;
+            sel_ORIG_NAME.id = "sel_ORIG_NAME";
+            var ORIG_NAME_options_str = "<option value='' unselected></option>";
+            sel_ORIG_NAME.onchange = function(){filterFunc()};
+            ORIG_NAME_options_str  += '<option value="Amani">Amani</option>';
+            ORIG_NAME_options_str  += '<option value="Arusha National Park">Arusha National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Baga I (Mzinga)">Baga I (Mzinga)</option>';
+            ORIG_NAME_options_str  += '<option value="Bagai">Bagai</option>';
+            ORIG_NAME_options_str  += '<option value="Balangai West">Balangai West</option>';
+            ORIG_NAME_options_str  += '<option value="Bamba Ridge">Bamba Ridge</option>';
+            ORIG_NAME_options_str  += '<option value="Bassi">Bassi</option>';
+            ORIG_NAME_options_str  += '<option value="Bereku">Bereku</option>';
+            ORIG_NAME_options_str  += '<option value="Biharamulo">Biharamulo</option>';
+            ORIG_NAME_options_str  += '<option value="Bombo East 1">Bombo East 1</option>';
+            ORIG_NAME_options_str  += '<option value="Bombo East 2">Bombo East 2</option>';
+            ORIG_NAME_options_str  += '<option value="Bombo West">Bombo West</option>';
+            ORIG_NAME_options_str  += '<option value="Bondo">Bondo</option>';
+            ORIG_NAME_options_str  += '<option value="Buhindi">Buhindi</option>';
+            ORIG_NAME_options_str  += '<option value="Bulogwa">Bulogwa</option>';
+            ORIG_NAME_options_str  += '<option value="Bunduki III">Bunduki III</option>';
+            ORIG_NAME_options_str  += '<option value="Burko">Burko</option>';
+            ORIG_NAME_options_str  += '<option value="Burko O.A.">Burko O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Burunge WMA">Burunge WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Chala Hills">Chala Hills</option>';
+            ORIG_NAME_options_str  += '<option value="Chamanyani">Chamanyani</option>';
+            ORIG_NAME_options_str  += '<option value="Chambogo">Chambogo</option>';
+            ORIG_NAME_options_str  += '<option value="Changandu">Changandu</option>';
+            ORIG_NAME_options_str  += '<option value="Chaya O.A.">Chaya O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Chemi chemi">Chemi chemi</option>';
+            ORIG_NAME_options_str  += '<option value="Chimala Scarp">Chimala Scarp</option>';
+            ORIG_NAME_options_str  += '<option value="Chinene West">Chinene West</option>';
+            ORIG_NAME_options_str  += '<option value="Chitoa">Chitoa</option>';
+            ORIG_NAME_options_str  += '<option value="Chome">Chome</option>';
+            ORIG_NAME_options_str  += '<option value="Chongweni">Chongweni</option>';
+            ORIG_NAME_options_str  += '<option value="Chumwa Range">Chumwa Range</option>';
+            ORIG_NAME_options_str  += '<option value="Chunya Lukawati O.A.">Chunya Lukawati O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Chunya O.A (E)">Chunya O.A (E)</option>';
+            ORIG_NAME_options_str  += '<option value="Dindili">Dindili</option>';
+            ORIG_NAME_options_str  += '<option value="Disalasala">Disalasala</option>';
+            ORIG_NAME_options_str  += '<option value="Dodoma Reservoir">Dodoma Reservoir</option>';
+            ORIG_NAME_options_str  += '<option value="East Chenene">East Chenene</option>';
+            ORIG_NAME_options_str  += '<option value="Enduimet WMA">Enduimet WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Essimingor">Essimingor</option>';
+            ORIG_NAME_options_str  += '<option value="Forest Reserve Name Unknown (TZA) (Mangrove) No.10">Forest Reserve Name Unknown (TZA) (Mangrove) No.10</option>';
+            ORIG_NAME_options_str  += '<option value="Forest Reserve Name Unknown (TZA) (Mangrove) No.18">Forest Reserve Name Unknown (TZA) (Mangrove) No.18</option>';
+            ORIG_NAME_options_str  += '<option value="Forest Reserve Name Unknown (TZA) (Mangrove) No.19">Forest Reserve Name Unknown (TZA) (Mangrove) No.19</option>';
+            ORIG_NAME_options_str  += '<option value="Forest Reserve Name Unknown No. 2">Forest Reserve Name Unknown No. 2</option>';
+            ORIG_NAME_options_str  += '<option value="Garafuno">Garafuno</option>';
+            ORIG_NAME_options_str  += '<option value="Geita">Geita</option>';
+            ORIG_NAME_options_str  += '<option value="Gelai">Gelai</option>';
+            ORIG_NAME_options_str  += '<option value="Gombe National Park">Gombe National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Gonja">Gonja</option>';
+            ORIG_NAME_options_str  += '<option value="Grumeti G.R.">Grumeti G.R.</option>';
+            ORIG_NAME_options_str  += '<option value="Gulosilo">Gulosilo</option>';
+            ORIG_NAME_options_str  += '<option value="Gwami">Gwami</option>';
+            ORIG_NAME_options_str  += '<option value="Handeni Hill">Handeni Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Haraa">Haraa</option>';
+            ORIG_NAME_options_str  += '<option value="Hassama">Hassama</option>';
+            ORIG_NAME_options_str  += '<option value="Iditima">Iditima</option>';
+            ORIG_NAME_options_str  += '<option value="Igombe Dam">Igombe Dam</option>';
+            ORIG_NAME_options_str  += '<option value="Igombe River">Igombe River</option>';
+            ORIG_NAME_options_str  += '<option value="Igwata">Igwata</option>';
+            ORIG_NAME_options_str  += '<option value="Ihoho">Ihoho</option>';
+            ORIG_NAME_options_str  += '<option value="Ijogo">Ijogo</option>';
+            ORIG_NAME_options_str  += '<option value="Ikona WMA">Ikona WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Ikorongo G.R.">Ikorongo G.R.</option>';
+            ORIG_NAME_options_str  += '<option value="Ikuru">Ikuru</option>';
+            ORIG_NAME_options_str  += '<option value="Ikwamba">Ikwamba</option>';
+            ORIG_NAME_options_str  += '<option value="Ilomero Hill">Ilomero Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Ilongafipa">Ilongafipa</option>';
+            ORIG_NAME_options_str  += '<option value="Ilunde">Ilunde</option>';
+            ORIG_NAME_options_str  += '<option value="Image">Image</option>';
+            ORIG_NAME_options_str  += '<option value="Ipole WMA">Ipole WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Irangi Escarpment">Irangi Escarpment</option>';
+            ORIG_NAME_options_str  += '<option value="Irenga">Irenga</option>';
+            ORIG_NAME_options_str  += '<option value="Iringa">Iringa</option>';
+            ORIG_NAME_options_str  += '<option value="Irkishbor O.A.">Irkishbor O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Irunda">Irunda</option>';
+            ORIG_NAME_options_str  += '<option value="Irungu">Irungu</option>';
+            ORIG_NAME_options_str  += '<option value="Isabe">Isabe</option>';
+            ORIG_NAME_options_str  += '<option value="Isalala">Isalala</option>';
+            ORIG_NAME_options_str  += '<option value="Ito">Ito</option>';
+            ORIG_NAME_options_str  += '<option value="Itulu Hill">Itulu Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Ituru Forest O.A.">Ituru Forest O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Ivuna">Ivuna</option>';
+            ORIG_NAME_options_str  += '<option value="Ivuna South">Ivuna South</option>';
+            ORIG_NAME_options_str  += '<option value="Jasini">Jasini</option>';
+            ORIG_NAME_options_str  += '<option value="Jozani-Chwaka Bay">Jozani-Chwaka Bay</option>';
+            ORIG_NAME_options_str  += '<option value="Kaghongo">Kaghongo</option>';
+            ORIG_NAME_options_str  += '<option value="Kahe I">Kahe I</option>';
+            ORIG_NAME_options_str  += '<option value="Kahe II">Kahe II</option>';
+            ORIG_NAME_options_str  += '<option value="Kalambo">Kalambo</option>';
+            ORIG_NAME_options_str  += '<option value="Kalambo falls">Kalambo falls</option>';
+            ORIG_NAME_options_str  += '<option value="Kambai">Kambai</option>';
+            ORIG_NAME_options_str  += '<option value="Kamwalla I">Kamwalla I</option>';
+            ORIG_NAME_options_str  += '<option value="Kamwalla II">Kamwalla II</option>';
+            ORIG_NAME_options_str  += '<option value="Kanga">Kanga</option>';
+            ORIG_NAME_options_str  += '<option value="Kankoma">Kankoma</option>';
+            ORIG_NAME_options_str  += '<option value="Kantale">Kantale</option>';
+            ORIG_NAME_options_str  += '<option value="Kasanga">Kasanga</option>';
+            ORIG_NAME_options_str  += '<option value="Katavi National Park">Katavi National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Katundu">Katundu</option>';
+            ORIG_NAME_options_str  += '<option value="Kawetire">Kawetire</option>';
+            ORIG_NAME_options_str  += '<option value="Kawetire Ipinda range">Kawetire Ipinda range</option>';
+            ORIG_NAME_options_str  += '<option value="Kawetire Karuwe range">Kawetire Karuwe range</option>';
+            ORIG_NAME_options_str  += '<option value="Kawetire Mbeya peak range">Kawetire Mbeya peak range</option>';
+            ORIG_NAME_options_str  += '<option value="Kazimzumbwi">Kazimzumbwi</option>';
+            ORIG_NAME_options_str  += '<option value="Kiamawe">Kiamawe</option>';
+            ORIG_NAME_options_str  += '<option value="Kiau Island">Kiau Island</option>';
+            ORIG_NAME_options_str  += '<option value="Kichi Hill">Kichi Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Kigogo">Kigogo</option>';
+            ORIG_NAME_options_str  += '<option value="Kigongkwe">Kigongkwe</option>';
+            ORIG_NAME_options_str  += '<option value="Kihanga">Kihanga</option>';
+            ORIG_NAME_options_str  += '<option value="Kihiliri">Kihiliri</option>';
+            ORIG_NAME_options_str  += '<option value="Kikale">Kikale</option>';
+            ORIG_NAME_options_str  += '<option value="Kikoka">Kikoka</option>';
+            ORIG_NAME_options_str  += '<option value="Kikongoro">Kikongoro</option>';
+            ORIG_NAME_options_str  += '<option value="Kikuru">Kikuru</option>';
+            ORIG_NAME_options_str  += '<option value="Kileo East">Kileo East</option>';
+            ORIG_NAME_options_str  += '<option value="Kilimanjaro National Park">Kilimanjaro National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Kilombero">Kilombero</option>';
+            ORIG_NAME_options_str  += '<option value="Kilwa O.A.">Kilwa O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Kimboza">Kimboza</option>';
+            ORIG_NAME_options_str  += '<option value="Kindoroko">Kindoroko</option>';
+            ORIG_NAME_options_str  += '<option value="Kingongoro">Kingongoro</option>';
+            ORIG_NAME_options_str  += '<option value="Kinyerezi">Kinyerezi</option>';
+            ORIG_NAME_options_str  += '<option value="Kipembawe">Kipembawe</option>';
+            ORIG_NAME_options_str  += '<option value="Kipengere Range">Kipengere Range</option>';
+            ORIG_NAME_options_str  += '<option value="Kipo">Kipo</option>';
+            ORIG_NAME_options_str  += '<option value="Kiriguru">Kiriguru</option>';
+            ORIG_NAME_options_str  += '<option value="Kisima Gonja">Kisima Gonja</option>';
+            ORIG_NAME_options_str  += '<option value="Kisinga Rugaro">Kisinga Rugaro</option>';
+            ORIG_NAME_options_str  += '<option value="Kitapilimwa">Kitapilimwa</option>';
+            ORIG_NAME_options_str  += '<option value="Kitara Ridge">Kitara Ridge</option>';
+            ORIG_NAME_options_str  += '<option value="Kitivo North">Kitivo North</option>';
+            ORIG_NAME_options_str  += '<option value="Kitonbeine">Kitonbeine</option>';
+            ORIG_NAME_options_str  += '<option value="Kitope Hill">Kitope Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Kitovo South">Kitovo South</option>';
+            ORIG_NAME_options_str  += '<option value="Kitulanghalo">Kitulanghalo</option>';
+            ORIG_NAME_options_str  += '<option value="Kitulo Plateau National Park">Kitulo Plateau National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Kitweli">Kitweli</option>';
+            ORIG_NAME_options_str  += '<option value="Kiverenge">Kiverenge</option>';
+            ORIG_NAME_options_str  += '<option value="Kiwengoma">Kiwengoma</option>';
+            ORIG_NAME_options_str  += '<option value="Kiwengwa Pongwe">Kiwengwa Pongwe</option>';
+            ORIG_NAME_options_str  += '<option value="Kiwira">Kiwira</option>';
+            ORIG_NAME_options_str  += '<option value="Kizigo G.R. (C)">Kizigo G.R. (C)</option>';
+            ORIG_NAME_options_str  += '<option value="Koko Hill">Koko Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Kome Island">Kome Island</option>';
+            ORIG_NAME_options_str  += '<option value="Konga">Konga</option>';
+            ORIG_NAME_options_str  += '<option value="Korogwe Fuel">Korogwe Fuel</option>';
+            ORIG_NAME_options_str  += '<option value="Kubungu">Kubungu</option>';
+            ORIG_NAME_options_str  += '<option value="Kungwe Bay">Kungwe Bay</option>';
+            ORIG_NAME_options_str  += '<option value="Kurwirwi">Kurwirwi</option>';
+            ORIG_NAME_options_str  += '<option value="Kwamarimba">Kwamarimba</option>';
+            ORIG_NAME_options_str  += '<option value="Kwamarukanga">Kwamarukanga</option>';
+            ORIG_NAME_options_str  += '<option value="Kwamgumi">Kwamgumi</option>';
+            ORIG_NAME_options_str  += '<option value="Kwani">Kwani</option>';
+            ORIG_NAME_options_str  += '<option value="Kwasumba">Kwasumba</option>';
+            ORIG_NAME_options_str  += '<option value="Kwedonda">Kwedonda</option>';
+            ORIG_NAME_options_str  += '<option value="Kwembago">Kwembago</option>';
+            ORIG_NAME_options_str  += '<option value="Kyanayari">Kyanayari</option>';
+            ORIG_NAME_options_str  += '<option value="Kyarano">Kyarano</option>';
+            ORIG_NAME_options_str  += '<option value="Lake Duluti">Lake Duluti</option>';
+            ORIG_NAME_options_str  += '<option value="Lake Manyara National Park">Lake Manyara National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Lake Rukwa G.R">Lake Rukwa G.R</option>';
+            ORIG_NAME_options_str  += '<option value="Ligamba">Ligamba</option>';
+            ORIG_NAME_options_str  += '<option value="Lionja">Lionja</option>';
+            ORIG_NAME_options_str  += '<option value="Liparamba G.R">Liparamba G.R</option>';
+            ORIG_NAME_options_str  += '<option value="Litipo">Litipo</option>';
+            ORIG_NAME_options_str  += '<option value="Litoni">Litoni</option>';
+            ORIG_NAME_options_str  += '<option value="Litumbandyosi O.A./Gezamasua F.R.">Litumbandyosi O.A./Gezamasua F.R.</option>';
+            ORIG_NAME_options_str  += '<option value="Livingstone">Livingstone</option>';
+            ORIG_NAME_options_str  += '<option value="Liwale WMA">Liwale WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Liwili/Kiteza/Lwekea">Liwili/Kiteza/Lwekea</option>';
+            ORIG_NAME_options_str  += '<option value="Loasi river">Loasi river</option>';
+            ORIG_NAME_options_str  += '<option value="Lohombero/Luwengu">Lohombero/Luwengu</option>';
+            ORIG_NAME_options_str  += '<option value="Loliondo I">Loliondo I</option>';
+            ORIG_NAME_options_str  += '<option value="Loliondo II">Loliondo II</option>';
+            ORIG_NAME_options_str  += '<option value="Longuza">Longuza</option>';
+            ORIG_NAME_options_str  += '<option value="Longuza Kolekole Range">Longuza Kolekole Range</option>';
+            ORIG_NAME_options_str  += '<option value="Longuza_Kihuhwi Range">Longuza_Kihuhwi Range</option>';
+            ORIG_NAME_options_str  += '<option value="Lubaga">Lubaga</option>';
+            ORIG_NAME_options_str  += '<option value="Lugufu">Lugufu</option>';
+            ORIG_NAME_options_str  += '<option value="Luiche">Luiche</option>';
+            ORIG_NAME_options_str  += '<option value="Lukoka Hill">Lukoka Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Lukwati">Lukwati</option>';
+            ORIG_NAME_options_str  += '<option value="Lukwika-Lumesule G.R.">Lukwika-Lumesule G.R.</option>';
+            ORIG_NAME_options_str  += '<option value="Lulanda">Lulanda</option>';
+            ORIG_NAME_options_str  += '<option value="Lungonya">Lungonya</option>';
+            ORIG_NAME_options_str  += '<option value="Lupa North">Lupa North</option>';
+            ORIG_NAME_options_str  += '<option value="Lusugulu">Lusugulu</option>';
+            ORIG_NAME_options_str  += '<option value="Lwafi-Nkamba G.R.">Lwafi-Nkamba G.R.</option>';
+            ORIG_NAME_options_str  += '<option value="Lyambo Hill">Lyambo Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Madenge">Madenge</option>';
+            ORIG_NAME_options_str  += '<option value="Mafi Hill">Mafi Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Mafleta">Mafleta</option>';
+            ORIG_NAME_options_str  += '<option value="Mafwomero">Mafwomero</option>';
+            ORIG_NAME_options_str  += '<option value="Magamba">Magamba</option>';
+            ORIG_NAME_options_str  += '<option value="Magambazi">Magambazi</option>';
+            ORIG_NAME_options_str  += '<option value="Maganda">Maganda</option>';
+            ORIG_NAME_options_str  += '<option value="Magombera">Magombera</option>';
+            ORIG_NAME_options_str  += '<option value="Magoroto">Magoroto</option>';
+            ORIG_NAME_options_str  += '<option value="Magroove">Magroove</option>';
+            ORIG_NAME_options_str  += '<option value="Magwamila O.A.">Magwamila O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Mahale Mts.National Park">Mahale Mts.National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Mahenge O.A.">Mahenge O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Mahenge Scarp">Mahenge Scarp</option>';
+            ORIG_NAME_options_str  += '<option value="Maisome">Maisome</option>';
+            ORIG_NAME_options_str  += '<option value="Makame WMA">Makame WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Makere South">Makere South</option>';
+            ORIG_NAME_options_str  += '<option value="Makonde Scarp I">Makonde Scarp I</option>';
+            ORIG_NAME_options_str  += '<option value="Makonde Scarp II">Makonde Scarp II</option>';
+            ORIG_NAME_options_str  += '<option value="Makonde Scarp III">Makonde Scarp III</option>';
+            ORIG_NAME_options_str  += '<option value="Malehi">Malehi</option>';
+            ORIG_NAME_options_str  += '<option value="Mamani">Mamani</option>';
+            ORIG_NAME_options_str  += '<option value="Mamboto">Mamboto</option>';
+            ORIG_NAME_options_str  += '<option value="Mamboya">Mamboya</option>';
+            ORIG_NAME_options_str  += '<option value="Mamiwa Kisara South">Mamiwa Kisara South</option>';
+            ORIG_NAME_options_str  += '<option value="Manga">Manga</option>';
+            ORIG_NAME_options_str  += '<option value="Mangalisa">Mangalisa</option>';
+            ORIG_NAME_options_str  += '<option value="Mangrove">Mangrove</option>';
+            ORIG_NAME_options_str  += '<option value="Mangrove No.20">Mangrove No.20</option>';
+            ORIG_NAME_options_str  += '<option value="Mangroves (Mikindani)">Mangroves (Mikindani)</option>';
+            ORIG_NAME_options_str  += '<option value="Mangroves along Mbezi">Mangroves along Mbezi</option>';
+            ORIG_NAME_options_str  += '<option value="Mangroves-Bagamoyo">Mangroves-Bagamoyo</option>';
+            ORIG_NAME_options_str  += '<option value="Mangroves-Kilwa">Mangroves-Kilwa</option>';
+            ORIG_NAME_options_str  += '<option value="Mangroves-Kisarawe">Mangroves-Kisarawe</option>';
+            ORIG_NAME_options_str  += '<option value="Manka">Manka</option>';
+            ORIG_NAME_options_str  += '<option value="Manohongho HIll">Manohongho HIll</option>';
+            ORIG_NAME_options_str  += '<option value="Maposeni">Maposeni</option>';
+            ORIG_NAME_options_str  += '<option value="Masagati">Masagati</option>';
+            ORIG_NAME_options_str  += '<option value="Masai O.A.">Masai O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Masanganya">Masanganya</option>';
+            ORIG_NAME_options_str  += '<option value="Masingini Catchment Forest">Masingini Catchment Forest</option>';
+            ORIG_NAME_options_str  += '<option value="Maswa G.R. (N)">Maswa G.R. (N)</option>';
+            ORIG_NAME_options_str  += '<option value="Maswa Kimali">Maswa Kimali</option>';
+            ORIG_NAME_options_str  += '<option value="Matapwa">Matapwa</option>';
+            ORIG_NAME_options_str  += '<option value="Matembwe">Matembwe</option>';
+            ORIG_NAME_options_str  += '<option value="Matogoro East">Matogoro East</option>';
+            ORIG_NAME_options_str  += '<option value="Matogoro West">Matogoro West</option>';
+            ORIG_NAME_options_str  += '<option value="Mbagala">Mbagala</option>';
+            ORIG_NAME_options_str  += '<option value="Mbarang&apos;andu WMA">Mbarang&apos;andu WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Mbegere">Mbegere</option>';
+            ORIG_NAME_options_str  += '<option value="Mbeya Range">Mbeya Range</option>';
+            ORIG_NAME_options_str  += '<option value="Mbeya fuel">Mbeya fuel</option>';
+            ORIG_NAME_options_str  += '<option value="Mbinga Kimaji / Kimate">Mbinga Kimaji / Kimate</option>';
+            ORIG_NAME_options_str  += '<option value="Mbogo">Mbogo</option>';
+            ORIG_NAME_options_str  += '<option value="Mchungu">Mchungu</option>';
+            ORIG_NAME_options_str  += '<option value="Mdando">Mdando</option>';
+            ORIG_NAME_options_str  += '<option value="Meru">Meru</option>';
+            ORIG_NAME_options_str  += '<option value="Meru Kilinga Range">Meru Kilinga Range</option>';
+            ORIG_NAME_options_str  += '<option value="Meru Sakila Range">Meru Sakila Range</option>';
+            ORIG_NAME_options_str  += '<option value="Mgambo">Mgambo</option>';
+            ORIG_NAME_options_str  += '<option value="Mgololo">Mgololo</option>';
+            ORIG_NAME_options_str  += '<option value="Mhalo">Mhalo</option>';
+            ORIG_NAME_options_str  += '<option value="Mikumi National Park">Mikumi National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Milindo">Milindo</option>';
+            ORIG_NAME_options_str  += '<option value="Minja">Minja</option>';
+            ORIG_NAME_options_str  += '<option value="Minziro">Minziro</option>';
+            ORIG_NAME_options_str  += '<option value="Mitauure">Mitauure</option>';
+            ORIG_NAME_options_str  += '<option value="Mitundumbea">Mitundumbea</option>';
+            ORIG_NAME_options_str  += '<option value="Mkangala">Mkangala</option>';
+            ORIG_NAME_options_str  += '<option value="Mkewe">Mkewe</option>';
+            ORIG_NAME_options_str  += '<option value="Mkingu">Mkingu</option>';
+            ORIG_NAME_options_str  += '<option value="Mkomazi National Park">Mkomazi National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Mkongo">Mkongo</option>';
+            ORIG_NAME_options_str  += '<option value="Mkoro">Mkoro</option>';
+            ORIG_NAME_options_str  += '<option value="Mkulazi">Mkulazi</option>';
+            ORIG_NAME_options_str  += '<option value="Mkuli Exten.">Mkuli Exten.</option>';
+            ORIG_NAME_options_str  += '<option value="Mkundi">Mkundi</option>';
+            ORIG_NAME_options_str  += '<option value="Mkungwe">Mkungwe</option>';
+            ORIG_NAME_options_str  += '<option value="Mkussu">Mkussu</option>';
+            ORIG_NAME_options_str  += '<option value="Mkuti">Mkuti</option>';
+            ORIG_NAME_options_str  += '<option value="Mkweni Hill">Mkweni Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Mlali">Mlali</option>';
+            ORIG_NAME_options_str  += '<option value="Mlele G.C.A.(S)">Mlele G.C.A.(S)</option>';
+            ORIG_NAME_options_str  += '<option value="Mlinga">Mlinga</option>';
+            ORIG_NAME_options_str  += '<option value="Mlola">Mlola</option>';
+            ORIG_NAME_options_str  += '<option value="Mlungui">Mlungui</option>';
+            ORIG_NAME_options_str  += '<option value="Mninga">Mninga</option>';
+            ORIG_NAME_options_str  += '<option value="Mohoro">Mohoro</option>';
+            ORIG_NAME_options_str  += '<option value="Mohoro River">Mohoro River</option>';
+            ORIG_NAME_options_str  += '<option value="Mombo">Mombo</option>';
+            ORIG_NAME_options_str  += '<option value="Monduli">Monduli</option>';
+            ORIG_NAME_options_str  += '<option value="Monduli Juu O.A.">Monduli Juu O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Morogoro Fuel">Morogoro Fuel</option>';
+            ORIG_NAME_options_str  += '<option value="Mount Hanang">Mount Hanang</option>';
+            ORIG_NAME_options_str  += '<option value="Mount Rungwe">Mount Rungwe</option>';
+            ORIG_NAME_options_str  += '<option value="Moyowosi G.R (N)">Moyowosi G.R (N)</option>';
+            ORIG_NAME_options_str  += '<option value="Mpala">Mpala</option>';
+            ORIG_NAME_options_str  += '<option value="Mpanda Line">Mpanda Line</option>';
+            ORIG_NAME_options_str  += '<option value="Mpanda North East">Mpanda North East</option>';
+            ORIG_NAME_options_str  += '<option value="Mpunze">Mpunze</option>';
+            ORIG_NAME_options_str  += '<option value="Mrema Kingarussina">Mrema Kingarussina</option>';
+            ORIG_NAME_options_str  += '<option value="Msanjesi GR/Kipitimbi/Lionja FR">Msanjesi GR/Kipitimbi/Lionja FR</option>';
+            ORIG_NAME_options_str  += '<option value="Mselezi">Mselezi</option>';
+            ORIG_NAME_options_str  += '<option value="Msingeho Hill">Msingeho Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Msuluguda O.A">Msuluguda O.A</option>';
+            ORIG_NAME_options_str  += '<option value="Msumbugwe">Msumbugwe</option>';
+            ORIG_NAME_options_str  += '<option value="Mswima">Mswima</option>';
+            ORIG_NAME_options_str  += '<option value="Mtai">Mtai</option>';
+            ORIG_NAME_options_str  += '<option value="Mtanza">Mtanza</option>';
+            ORIG_NAME_options_str  += '<option value="Mtibwa">Mtibwa</option>';
+            ORIG_NAME_options_str  += '<option value="Mtita">Mtita</option>';
+            ORIG_NAME_options_str  += '<option value="Mtumbi">Mtumbi</option>';
+            ORIG_NAME_options_str  += '<option value="Mtunguru">Mtunguru</option>';
+            ORIG_NAME_options_str  += '<option value="Mtungwe O.A. (C)">Mtungwe O.A. (C)</option>';
+            ORIG_NAME_options_str  += '<option value="Mufindi Scarp">Mufindi Scarp</option>';
+            ORIG_NAME_options_str  += '<option value="Mugaberi">Mugaberi</option>';
+            ORIG_NAME_options_str  += '<option value="Muhesi G.R (W)">Muhesi G.R (W)</option>';
+            ORIG_NAME_options_str  += '<option value="Muhezangulu">Muhezangulu</option>';
+            ORIG_NAME_options_str  += '<option value="Muhulu">Muhulu</option>';
+            ORIG_NAME_options_str  += '<option value="Muhuwesi">Muhuwesi</option>';
+            ORIG_NAME_options_str  += '<option value="Mulele Hills">Mulele Hills</option>';
+            ORIG_NAME_options_str  += '<option value="Munene">Munene</option>';
+            ORIG_NAME_options_str  += '<option value="Muva/Sumbawanga Plantation">Muva/Sumbawanga Plantation</option>';
+            ORIG_NAME_options_str  += '<option value="Mvuha">Mvuha</option>';
+            ORIG_NAME_options_str  += '<option value="Mwakulu">Mwakulu</option>';
+            ORIG_NAME_options_str  += '<option value="Mwamapalala">Mwamapalala</option>';
+            ORIG_NAME_options_str  += '<option value="Mwamapuli">Mwamapuli</option>';
+            ORIG_NAME_options_str  += '<option value="Mwambesi">Mwambesi</option>';
+            ORIG_NAME_options_str  += '<option value="Mwangilye">Mwangilye</option>';
+            ORIG_NAME_options_str  += '<option value="Mwanhala">Mwanhala</option>';
+            ORIG_NAME_options_str  += '<option value="Mwantini Hill">Mwantini Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Mwantisi O.A (S)">Mwantisi O.A (S)</option>';
+            ORIG_NAME_options_str  += '<option value="Mwantisi O.A. (N) and Furua">Mwantisi O.A. (N) and Furua</option>';
+            ORIG_NAME_options_str  += '<option value="Mwatunge Hill">Mwatunge Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Mwenga">Mwenga</option>';
+            ORIG_NAME_options_str  += '<option value="Myoe">Myoe</option>';
+            ORIG_NAME_options_str  += '<option value="Nagaliendele">Nagaliendele</option>';
+            ORIG_NAME_options_str  += '<option value="Namakutwa/Namade">Namakutwa/Namade</option>';
+            ORIG_NAME_options_str  += '<option value="Nambiga">Nambiga</option>';
+            ORIG_NAME_options_str  += '<option value="Name Unknown No. 4">Name Unknown No. 4</option>';
+            ORIG_NAME_options_str  += '<option value="Nampekeso">Nampekeso</option>';
+            ORIG_NAME_options_str  += '<option value="Nandembo">Nandembo</option>';
+            ORIG_NAME_options_str  += '<option value="Ndasha Hill">Ndasha Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Ndechela">Ndechela</option>';
+            ORIG_NAME_options_str  += '<option value="Ndelemai">Ndelemai</option>';
+            ORIG_NAME_options_str  += '<option value="Nderema">Nderema</option>';
+            ORIG_NAME_options_str  += '<option value="Ndolwa">Ndolwa</option>';
+            ORIG_NAME_options_str  += '<option value="Ndukunduku">Ndukunduku</option>';
+            ORIG_NAME_options_str  += '<option value="Ndumbi Valley">Ndumbi Valley</option>';
+            ORIG_NAME_options_str  += '<option value="New Dabaga-Ulongambi">New Dabaga-Ulongambi</option>';
+            ORIG_NAME_options_str  += '<option value="Ngarama North">Ngarama North</option>';
+            ORIG_NAME_options_str  += '<option value="Ngarambe-Tapika WMA">Ngarambe-Tapika WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Ngorongoro Conservation Area">Ngorongoro Conservation Area</option>';
+            ORIG_NAME_options_str  += '<option value="Nguluka">Nguluka</option>';
+            ORIG_NAME_options_str  += '<option value="Nguru ya Ndege">Nguru ya Ndege</option>';
+            ORIG_NAME_options_str  += '<option value="Ngwasi">Ngwasi</option>';
+            ORIG_NAME_options_str  += '<option value="Nilo">Nilo</option>';
+            ORIG_NAME_options_str  += '<option value="Nindo">Nindo</option>';
+            ORIG_NAME_options_str  += '<option value="Njogi">Njogi</option>';
+            ORIG_NAME_options_str  += '<option value="North East Undendeule">North East Undendeule</option>';
+            ORIG_NAME_options_str  += '<option value="North Kilimanjaro">North Kilimanjaro</option>';
+            ORIG_NAME_options_str  += '<option value="North Makere">North Makere</option>';
+            ORIG_NAME_options_str  += '<option value="North Mamiwa Kisara">North Mamiwa Kisara</option>';
+            ORIG_NAME_options_str  += '<option value="North Nguru">North Nguru</option>';
+            ORIG_NAME_options_str  += '<option value="Not Reported">Not Reported</option>';
+            ORIG_NAME_options_str  += '<option value="Nou">Nou</option>';
+            ORIG_NAME_options_str  += '<option value="Nyabasi">Nyabasi</option>';
+            ORIG_NAME_options_str  += '<option value="Nyahua Mbuga">Nyahua Mbuga</option>';
+            ORIG_NAME_options_str  += '<option value="Nyandiduma">Nyandiduma</option>';
+            ORIG_NAME_options_str  += '<option value="Nyandira">Nyandira</option>';
+            ORIG_NAME_options_str  += '<option value="Nyanganje">Nyanganje</option>';
+            ORIG_NAME_options_str  += '<option value="Nyantakara">Nyantakara</option>';
+            ORIG_NAME_options_str  += '<option value="Nyera/Kiperere">Nyera/Kiperere</option>';
+            ORIG_NAME_options_str  += '<option value="Nyonga">Nyonga</option>';
+            ORIG_NAME_options_str  += '<option value="Pala Mountain">Pala Mountain</option>';
+            ORIG_NAME_options_str  += '<option value="Pangawe East">Pangawe East</option>';
+            ORIG_NAME_options_str  += '<option value="Pangawe West">Pangawe West</option>';
+            ORIG_NAME_options_str  += '<option value="Pawaga-Idodi WMA">Pawaga-Idodi WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Pindiro">Pindiro</option>';
+            ORIG_NAME_options_str  += '<option value="Piti O.A. (W)">Piti O.A. (W)</option>';
+            ORIG_NAME_options_str  += '<option value="Piti O.A.(E)">Piti O.A.(E)</option>';
+            ORIG_NAME_options_str  += '<option value="Pongwe">Pongwe</option>';
+            ORIG_NAME_options_str  += '<option value="Poroto Ridge">Poroto Ridge</option>';
+            ORIG_NAME_options_str  += '<option value="Puge South">Puge South</option>';
+            ORIG_NAME_options_str  += '<option value="Pugu">Pugu</option>';
+            ORIG_NAME_options_str  += '<option value="Pumula">Pumula</option>';
+            ORIG_NAME_options_str  += '<option value="Rau">Rau</option>';
+            ORIG_NAME_options_str  += '<option value="Rondo">Rondo</option>';
+            ORIG_NAME_options_str  += '<option value="Ruaha National Park">Ruaha National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Ruamagazi">Ruamagazi</option>';
+            ORIG_NAME_options_str  += '<option value="Ruawa">Ruawa</option>';
+            ORIG_NAME_options_str  += '<option value="Rubare">Rubare</option>';
+            ORIG_NAME_options_str  += '<option value="Rubondo Island National Park">Rubondo Island National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Rubya">Rubya</option>';
+            ORIG_NAME_options_str  += '<option value="Rudewa South">Rudewa South</option>';
+            ORIG_NAME_options_str  += '<option value="Ruhidji/Ifinga O.A.">Ruhidji/Ifinga O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Ruhoi River">Ruhoi River</option>';
+            ORIG_NAME_options_str  += '<option value="Ruiga River">Ruiga River</option>';
+            ORIG_NAME_options_str  += '<option value="Rukwa">Rukwa</option>';
+            ORIG_NAME_options_str  += '<option value="Rungo">Rungo</option>';
+            ORIG_NAME_options_str  += '<option value="Rungwa (N) O.A.">Rungwa (N) O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Rungwa Mwamagembe G.R.">Rungwa Mwamagembe G.R.</option>';
+            ORIG_NAME_options_str  += '<option value="Rungwa River G.C.A.">Rungwa River G.C.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Rupiange">Rupiange</option>';
+            ORIG_NAME_options_str  += '<option value="Rushwezi">Rushwezi</option>';
+            ORIG_NAME_options_str  += '<option value="Ruvu">Ruvu</option>';
+            ORIG_NAME_options_str  += '<option value="Ruvu North">Ruvu North</option>';
+            ORIG_NAME_options_str  += '<option value="Ruvu South">Ruvu South</option>';
+            ORIG_NAME_options_str  += '<option value="Ruvuma O.A.">Ruvuma O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Saadani National Park">Saadani National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Saanane Island National Park">Saanane Island National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Sakaranyumo">Sakaranyumo</option>';
+            ORIG_NAME_options_str  += '<option value="Salanga/Bereku">Salanga/Bereku</option>';
+            ORIG_NAME_options_str  += '<option value="Sali">Sali</option>';
+            ORIG_NAME_options_str  += '<option value="Sao Hill">Sao Hill</option>';
+            ORIG_NAME_options_str  += '<option value="Sao Hill extension">Sao Hill extension</option>';
+            ORIG_NAME_options_str  += '<option value="Sasajila">Sasajila</option>';
+            ORIG_NAME_options_str  += '<option value="Sasawara">Sasawara</option>';
+            ORIG_NAME_options_str  += '<option value="Sawago">Sawago</option>';
+            ORIG_NAME_options_str  += '<option value="Sayaka">Sayaka</option>';
+            ORIG_NAME_options_str  += '<option value="Segoma">Segoma</option>';
+            ORIG_NAME_options_str  += '<option value="Selous G.R">Selous G.R</option>';
+            ORIG_NAME_options_str  += '<option value="Semdoe/Msige">Semdoe/Msige</option>';
+            ORIG_NAME_options_str  += '<option value="Serengeti National Park">Serengeti National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Shagayu">Shagayu</option>';
+            ORIG_NAME_options_str  += '<option value="Shambalai">Shambalai</option>';
+            ORIG_NAME_options_str  += '<option value="Shikurifumi">Shikurifumi</option>';
+            ORIG_NAME_options_str  += '<option value="Shume">Shume</option>';
+            ORIG_NAME_options_str  += '<option value="Simbo">Simbo</option>';
+            ORIG_NAME_options_str  += '<option value="Simbo_Bagamoyo">Simbo_Bagamoyo</option>';
+            ORIG_NAME_options_str  += '<option value="Sisu">Sisu</option>';
+            ORIG_NAME_options_str  += '<option value="Songa">Songa</option>';
+            ORIG_NAME_options_str  += '<option value="Songea Fuel">Songea Fuel</option>';
+            ORIG_NAME_options_str  += '<option value="South Gendagenda">South Gendagenda</option>';
+            ORIG_NAME_options_str  += '<option value="Swagaswaga G.R">Swagaswaga G.R</option>';
+            ORIG_NAME_options_str  += '<option value="Talagwe">Talagwe</option>';
+            ORIG_NAME_options_str  += '<option value="Talamai O.A.">Talamai O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Tambulu">Tambulu</option>';
+            ORIG_NAME_options_str  += '<option value="Tarangire National Park">Tarangire National Park</option>';
+            ORIG_NAME_options_str  += '<option value="Tongomba New">Tongomba New</option>';
+            ORIG_NAME_options_str  += '<option value="Tongwe East">Tongwe East</option>';
+            ORIG_NAME_options_str  += '<option value="Tunduru WMA">Tunduru WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Udzungwa Mountain">Udzungwa Mountain</option>';
+            ORIG_NAME_options_str  += '<option value="Ufiome">Ufiome</option>';
+            ORIG_NAME_options_str  += '<option value="Ugalla G.R. (N)">Ugalla G.R. (N)</option>';
+            ORIG_NAME_options_str  += '<option value="Ugalla Niensi O.A.">Ugalla Niensi O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Ugalla North">Ugalla North</option>';
+            ORIG_NAME_options_str  += '<option value="Ugalla North O.A.">Ugalla North O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="Ugalla River">Ugalla River</option>';
+            ORIG_NAME_options_str  += '<option value="Ukune">Ukune</option>';
+            ORIG_NAME_options_str  += '<option value="Ukutu WMA">Ukutu WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Ukwiva">Ukwiva</option>';
+            ORIG_NAME_options_str  += '<option value="Uluguru">Uluguru</option>';
+            ORIG_NAME_options_str  += '<option value="Umalila">Umalila</option>';
+            ORIG_NAME_options_str  += '<option value="Unyambiu North">Unyambiu North</option>';
+            ORIG_NAME_options_str  += '<option value="Uponera">Uponera</option>';
+            ORIG_NAME_options_str  += '<option value="Urumwa">Urumwa</option>';
+            ORIG_NAME_options_str  += '<option value="Usindikwe">Usindikwe</option>';
+            ORIG_NAME_options_str  += '<option value="Uvinza">Uvinza</option>';
+            ORIG_NAME_options_str  += '<option value="Uyui - Kigwa">Uyui - Kigwa</option>';
+            ORIG_NAME_options_str  += '<option value="Uyumbu WMA">Uyumbu WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Uzigua">Uzigua</option>';
+            ORIG_NAME_options_str  += '<option value="Uzunwga Scarp">Uzunwga Scarp</option>';
+            ORIG_NAME_options_str  += '<option value="Vigoregore">Vigoregore</option>';
+            ORIG_NAME_options_str  += '<option value="Vigoza">Vigoza</option>';
+            ORIG_NAME_options_str  += '<option value="Vikindu">Vikindu</option>';
+            ORIG_NAME_options_str  += '<option value="Vugiri">Vugiri</option>';
+            ORIG_NAME_options_str  += '<option value="Vumari">Vumari</option>';
+            ORIG_NAME_options_str  += '<option value="Wala River">Wala River</option>';
+            ORIG_NAME_options_str  += '<option value="Wami Mbiki WMA">Wami Mbiki WMA</option>';
+            ORIG_NAME_options_str  += '<option value="Wembere O.A.">Wembere O.A.</option>';
+            ORIG_NAME_options_str  += '<option value="West Kilimanjaro">West Kilimanjaro</option>';
+            ORIG_NAME_options_str  += '<option value="West Kilimanjaro_ Sanya Range">West Kilimanjaro_ Sanya Range</option>';
+            ORIG_NAME_options_str  += '<option value="Wino">Wino</option>';
+            ORIG_NAME_options_str  += '<option value="Wotta">Wotta</option>';
+            ORIG_NAME_options_str  += '<option value="Zaraninge">Zaraninge</option>';
+            sel_ORIG_NAME.innerHTML = ORIG_NAME_options_str;
+            div_ORIG_NAME.appendChild(sel_ORIG_NAME);
+            var lab_ORIG_NAME = document.createElement('div');
+            lab_ORIG_NAME.innerHTML = 'ORIG_NAME';
+            lab_ORIG_NAME.className = 'filterlabel';
+            div_ORIG_NAME.appendChild(lab_ORIG_NAME);
+            var reset_ORIG_NAME = document.createElement('div');
+            reset_ORIG_NAME.innerHTML = 'clear filter';
+            reset_ORIG_NAME.className = 'filterlabel';
+            reset_ORIG_NAME.onclick = function() {
+                var options = document.getElementById("sel_ORIG_NAME").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_ORIG_NAME.appendChild(reset_ORIG_NAME);
+        </script>
+    </body>
+</html>
